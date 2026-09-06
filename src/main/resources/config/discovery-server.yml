@@ -1,0 +1,42 @@
+server:
+  port: 8761
+
+spring:
+  security:
+    user:
+      name: admin
+      password: admin123
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  server:
+    # Configuración para desarrollo - deshabilita auto-preservación
+    enable-self-preservation: false
+    # Intervalo de expiración de instancias (en milisegundos) - por defecto 60000
+    eviction-interval-timer-in-ms: 5000
+    # Umbral de renovaciones esperadas
+    renewal-percent-threshold: 0.5
+    # Respuesta en caché
+    response-cache-update-interval-ms: 3000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: always
+
+# Info endpoint
+info:
+  app:
+    name: Eureka Discovery Server
+    description: Convivo Service Registry
+    version: 1.0.0

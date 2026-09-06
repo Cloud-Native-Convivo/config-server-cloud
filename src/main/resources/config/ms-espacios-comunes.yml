@@ -1,0 +1,26 @@
+# ms-espacios-comunes lo consume al arrancar (fetch HTTP best-effort en
+# app/config/settings.py:cargar_configuracion_remota — solo completa variables no
+# definidas ya en .env local, ver ms-espacios-comunes/AGENTS.md §2). Sin credenciales
+# (db/rabbitmq password) — esas quedan solo en .env local, nunca en config-server
+# (sin auth propia, ver config-server/AGENTS.md §10).
+
+server:
+  port: 8082
+
+db:
+  host: localhost
+  port: 1521
+  name: espacios_db
+  username: admin
+
+rabbitmq:
+  host: localhost
+  port: 5672
+  usuario: guest
+
+eureka:
+  url: http://localhost:8761/eureka/
+  ip: 127.0.0.1
+  port: 8082
+
+modo-debug: false
