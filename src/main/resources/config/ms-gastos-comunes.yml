@@ -1,0 +1,18 @@
+# ms-gastos-comunes lo importa al arrancar vía "optional:configserver:"
+# (ver ms-gastos-comunes/src/main/resources/application-aws.yml) — config-server
+# caído no bloquea el arranque. Solo valores no sensibles: credenciales
+# (DB/RabbitMQ) quedan en variables de entorno / Secrets Manager, nunca acá.
+
+server:
+  port: 8083
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
