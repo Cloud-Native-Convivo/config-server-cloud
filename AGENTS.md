@@ -237,6 +237,7 @@ Formato con Gitmoji: `:emoji: <tipo>(<alcance>)?(!)?: <sujeto>`. El emoji va **a
 - No contradice la regla de firma de agente: el emoji es semántico (tipo de cambio), no atribución de autoría.
 
 **Ejemplos:**
+
 ```
 :bug: fix(config): valida YAML sin claves duplicadas antes de servir
 :sparkles: feat(config): agrega ms-espacios-comunes.yml
@@ -340,6 +341,7 @@ git checkout develop && git pull origin develop
 Los tags en `main` marcan releases de producción y deben ser **anotados e informativos**. Nunca crear tags livianos (lightweight) ni mensajes tautológicos tipo `-m "v1.2.0"`.
 
 **Reglas de etiquetado:**
+
 1. **Tags anotados obligatorios (`git tag -a`)**: Preservan autor, fecha y mensaje estructurado.
 2. **Formato del identificador**: `v<MAJOR>.<MINOR>.<PATCH>` (ej. `v1.2.0`).
 3. **Estructura del mensaje**:
@@ -349,6 +351,7 @@ Los tags en `main` marcan releases de producción y deben ser **anotados e infor
    - **Referencias**: Enlaces a PRs o issues asociados.
 
 **Ejemplo de creación:**
+
 ```bash
 git tag -a v1.2.0 -m "v1.2.0: Servidor de configuración centralizada Spring Cloud
 
@@ -359,6 +362,7 @@ git tag -a v1.2.0 -m "v1.2.0: Servidor de configuración centralizada Spring Clo
 ```
 
 **Lectura y auditoría:**
+
 ```bash
 git show v1.2.0          # Muestra el mensaje completo y metadatos del tag
 git tag -n9              # Lista tags con hasta 9 líneas de su anotación
@@ -371,6 +375,7 @@ git tag -n9              # Lista tags con hasta 9 líneas de su anotación
 **Preguntar primero**: force-push, `git reset --hard`/`clean`, agregar o actualizar dependencias, cualquier acción que afecte estado compartido (push, PR, deploy a staging).
 
 **Nunca sin aprobación explícita**:
+
 - Configuración de CI/CD (`.github/workflows/docker-publish.yml`).
 - Archivos de secretos o `.env`.
 - Deploy a producción.
