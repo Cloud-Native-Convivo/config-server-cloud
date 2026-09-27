@@ -14,7 +14,7 @@ eureka:
     register-with-eureka: false
     fetch-registry: false
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://admin:admin123@localhost:8761/eureka/
   server:
     # Configuración para desarrollo - deshabilita auto-preservación
     enable-self-preservation: false

@@ -1,18 +1,41 @@
-# ms-gastos-comunes lo importa al arrancar vía "optional:configserver:"
-# (ver ms-gastos-comunes/src/main/resources/application-aws.yml) — config-server
-# caído no bloquea el arranque. Solo valores no sensibles: credenciales
-# (DB/RabbitMQ) quedan en variables de entorno / Secrets Manager, nunca acá.
+# ms-gastos-comunes - Configuración centralizada servida por config-server
+# Credenciales sensibles (passwords) quedan en variables de entorno / Secrets Manager.
 
 server:
   port: 8083
 
 eureka:
   client:
+    enabled: true
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://admin:admin123@localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+    instance-id: ms-gastos-comunes:${server.port}
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+
+convivo:
+  mensajeria:
+    exchange-eventos: espacios_events
+    cola-reserva-creada: gastos_reserva_creada_queue
+    routing-key-reserva-creada: reserva_espacio_creada
+    routing-key-gasto-fallido: gasto_fallido
+    dlx: gastos.dlx
+    cola-dead-letter: gastos_reserva_creada_dlq
+    outbox-intervalo-ms: 5000
+    outbox-lote-maximo: 50
+    outbox-max-intentos: 10
+    listener-max-reintentos: 3
+  entra:
+    issuer-uri: https://login.microsoftonline.com/common/v2.0
+    jwks-uri: https://login.microsoftonline.com/common/discovery/v2.0/keys
