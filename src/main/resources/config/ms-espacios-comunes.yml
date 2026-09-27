@@ -1,8 +1,5 @@
-# ms-espacios-comunes lo consume al arrancar (fetch HTTP best-effort en
-# app/config/settings.py:cargar_configuracion_remota — solo completa variables no
-# definidas ya en .env local, ver ms-espacios-comunes/AGENTS.md §2). Sin credenciales
-# (db/rabbitmq password) — esas quedan solo en .env local, nunca en config-server
-# (sin auth propia, ver config-server/AGENTS.md §10).
+# ms-espacios-comunes (FastAPI) - Configuración centralizada servida por config-server
+# Consumida en arranque por app.config.settings.cargar_configuracion_remota
 
 server:
   port: 8082
@@ -10,17 +7,21 @@ server:
 db:
   host: localhost
   port: 1521
-  name: espacios_db
+  name: FREEPDB1
   username: admin
 
 rabbitmq:
   host: localhost
   port: 5672
   usuario: guest
+  contrasena: guest
 
 eureka:
-  url: http://localhost:8761/eureka/
+  url: http://admin:admin123@localhost:8761/eureka/
   ip: 127.0.0.1
   port: 8082
 
 modo-debug: false
+
+cors:
+  origins: ["http://localhost:4200", "http://127.0.0.1:4200"]
