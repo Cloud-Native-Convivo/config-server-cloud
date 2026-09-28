@@ -40,3 +40,19 @@ info:
     name: Eureka Discovery Server
     description: Convivo Service Registry
     version: 1.0.0
+
+---
+# Perfil Producción AWS: FAIL-CLOSED (sin contraseña por defecto)
+spring:
+  config:
+    activate:
+      on-profile: aws
+  security:
+    user:
+      name: ${DISCOVERY_USER:admin}
+      password: ${DISCOVERY_PASSWORD}
+
+eureka:
+  instance:
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:discovery-server}
+
