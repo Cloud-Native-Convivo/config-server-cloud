@@ -43,6 +43,8 @@ jobs:
         with:
           image-ref: config-server-cloud:scan
           format: sarif
+          # Sin esto trivy-action ignora severity con SARIF y falla ante cualquier HIGH
+          limit-severities-for-sarif: true
           output: trivy-results.sarif
           severity: CRITICAL
           ignore-unfixed: true
