@@ -1,0 +1,19 @@
+# bff (NestJS) - Configuración centralizada servida por config-server
+port: 3000
+global-prefix: api
+service-name: convivo-bff
+
+eureka:
+  url: http://admin:admin123@localhost:8761/eureka/
+  services:
+    gastos: MS-GASTOS-COMUNES
+    espacios: MS-ESPACIOS-COMUNES
+
+proxy:
+  timeout-ms: 2000
+
+rabbitmq:
+  enabled: true
+  urls: amqp://guest:guest@localhost:5672
+  exchange: espacios_events
+  queue: convivo.gastos.inbox

@@ -31,3 +31,11 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### OS & Indices ###
+.DS_Store
+Thumbs.db
+.codegraph/
+.env
+.env.*
+!.env.example
