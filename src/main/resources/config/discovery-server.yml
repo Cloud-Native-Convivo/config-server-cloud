@@ -4,8 +4,8 @@ server:
 spring:
   security:
     user:
-      name: admin
-      password: admin123
+      name: ${DISCOVERY_USER:admin}
+      password: ${DISCOVERY_PASSWORD}
 
 eureka:
   instance:
@@ -14,7 +14,7 @@ eureka:
     register-with-eureka: false
     fetch-registry: false
     service-url:
-      defaultZone: http://admin:admin123@localhost:8761/eureka/
+      defaultZone: http://${DISCOVERY_USER:admin}:${DISCOVERY_PASSWORD}@localhost:8761/eureka/
   server:
     # Configuración para desarrollo - deshabilita auto-preservación
     enable-self-preservation: false
