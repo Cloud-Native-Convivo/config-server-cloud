@@ -8,6 +8,7 @@ class ConfigServerApplicationTests {
 
 	@Test
 	void contextLoads() {
+		// Smoke test: valida que el contexto de Spring Boot inicialice correctamente.
 	}
 
 }
