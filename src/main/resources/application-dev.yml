@@ -1,0 +1,10 @@
+# Perfil local (docker-compose / mvnw spring-boot:run). Nunca activar en AWS.
+spring:
+  security:
+    user:
+      name: ${CONFIG_SERVER_USER:config_user}
+      password: ${CONFIG_SERVER_PASSWORD:dev_password}
+
+server:
+  ssl:
+    enabled: false

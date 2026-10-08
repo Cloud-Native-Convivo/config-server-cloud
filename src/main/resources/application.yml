@@ -5,8 +5,9 @@ spring:
     active: native
   security:
     user:
-      name: ${CONFIG_SERVER_USER:config_user}
-      password: ${CONFIG_SERVER_PASSWORD:secret_password}
+      # Sin defaults: si falta la env var el arranque falla. Admite hash: {bcrypt}$2a$...
+      name: ${CONFIG_SERVER_USER}
+      password: ${CONFIG_SERVER_PASSWORD}
   cloud:
     config:
       server:
@@ -17,8 +18,9 @@ server:
   port: 8888
   ssl:
     enabled: true
-    key-store: classpath:keystore.p12
-    key-store-password: changeit
+    # Keystore montado en runtime (no versionado); ej. file:/run/secrets/keystore.p12
+    key-store: ${SSL_KEYSTORE_PATH}
+    key-store-password: ${SSL_KEYSTORE_PASSWORD}
     key-store-type: PKCS12
     key-alias: config-server
 

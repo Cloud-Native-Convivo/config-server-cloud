@@ -42,13 +42,15 @@ Cuando dos reglas de este archivo entran en conflicto, se resuelven en este orde
 ```text
 src/main/java/com/convivo/config_server/
   ConfigServerApplication.java   # @SpringBootApplication + @EnableConfigServer
+  SecurityConfig.java            # Basic Auth en todo salvo /actuator/health, CSP
 src/main/resources/
-  application.yml                # puerto, perfil native, exposición actuator
+  application.yml                # puerto, TLS, perfil native, credenciales por env var (sin defaults)
+  application-dev.yml            # perfil local: sin TLS, credenciales por defecto
   config/
     discovery-server.yml         # servicio real, lo consume
     ms-espacios-comunes.yml      # servicio real, lo consume best-effort al arrancar
 src/test/java/com/convivo/config_server/
-  ConfigServerApplicationTests.java   # smoke test de contexto
+  ConfigServerApplicationTests.java   # contexto + reglas de acceso (health 200, config 401/200)
 dockerfile                       # build multi-stage
 docker-compose.yml                # dev: monta el código como volumen, mvn spring-boot:run
 ```
@@ -65,8 +67,8 @@ docker-compose.yml                # dev: monta el código como volumen, mvn spri
 # test acotado a una clase
 ./mvnw test -Dtest=ConfigServerApplicationTests
 
-# levantar local
-./mvnw spring-boot:run -Dspring-boot.run.profiles=native
+# levantar local (perfil dev: sin TLS, credenciales por defecto)
+./mvnw spring-boot:run -Dspring-boot.run.profiles=native,dev
 
 # levantar con docker-compose (dev, hot-reload por volumen montado)
 docker compose up --build
@@ -152,19 +154,19 @@ Si el proyecto declara ISO/IEC 25010 (§17.1), los atributos de calidad de esa n
 
 ## 10. Seguridad
 
-**Hallazgo real, sin corregir en este cambio**: `application.yml` no configura ninguna autenticación sobre los endpoints de Spring Cloud Config (`/{application}/{profile}`) ni restringe `management.endpoints.web.exposure` (expone `health, info`). Cualquiera con red al puerto `8888` puede leer toda la configuración servida, incluidos secretos si algún YAML de `config/` llegara a tenerlos en claro. Esto es OWASP A02 (configuración insegura) real, no hipotético — pendiente de decisión del equipo (ej. Spring Security Basic Auth; `spring.cloud.config.server.native` sigue funcionando igual detrás de auth).
+**Estado actual**: `SecurityConfig` exige HTTP Basic en todos los endpoints (incluido `/{application}/{profile}` y `/encrypt`/`/decrypt`) salvo `/actuator/health`. TLS activo en `8888`. Sin secretos en el repo: `application.yml` exige `CONFIG_SERVER_USER`, `CONFIG_SERVER_PASSWORD`, `SSL_KEYSTORE_PATH` y `SSL_KEYSTORE_PASSWORD` sin defaults (fail-fast); el keystore se monta en runtime (`*.p12` en `.gitignore`/`.dockerignore`). `CONFIG_SERVER_PASSWORD` acepta hash `{bcrypt}$2a$...` (los clientes siguen enviando la clave en texto plano). Perfil `dev` (`application-dev.yml`, activado por `docker-compose.yml`) desactiva TLS y trae credenciales locales — nunca activarlo en AWS. Reglas de acceso y BCrypt cubiertas por `ConfigServerApplicationTests`. **Pendiente**: el keystore anterior quedó en el historial git de un repo público (commit `c055fea`) — certificado comprometido, regenerar; la task de ECS debe inyectar las 4 variables y montar el keystore o no arranca.
 
 **OWASP Top 10:2025 — alcance real en este proyecto:**
 
-- **A01 Control de acceso roto**: sin control de acceso implementado — ver hallazgo arriba.
+- **A01 Control de acceso roto**: Basic Auth en todo salvo `/actuator/health` (`SecurityConfig`), verificado por test.
 - **A02 Configuración insegura**: ver hallazgo arriba; además, sin HTTPS configurado (HTTP plano en `8888`).
 - **A03 Fallos de cadena de suministro**: dependencias resueltas vía `pom.xml` con `spring-cloud-dependencies` como BOM; sin CVEs conocidos al momento de escribir esto — revisar con `dependency-audit` antes de cada release.
 - **A04 Fallos criptográficos**: `(no aplica: sin criptografía propia, sin secretos manejados directamente por este servicio)`.
 - **A05 Inyección**: `(no aplica: sin DB relacional, sin queries)`.
 - **A06 Diseño inseguro**: `(no aplica: servicio de configuración sin flujo de negocio propio)`.
-- **A07 Fallos de autenticación**: `(no aplica: sin autenticación de usuarios — ver A01 para el control de acceso al servicio en sí)`.
+- **A07 Fallos de autenticación**: un único usuario técnico (Basic Auth) para los clientes de config; password admite hash BCrypt, sin defaults fuera del perfil `dev`.
 - **A08 Fallos de integridad**: `(no aplica: sin deserialización de input externo)`.
-- **A09 Fallos de logging**: sin logging de eventos de seguridad configurado — no hay eventos de seguridad propios que loggear mientras no exista auth (ver A01).
+- **A09 Fallos de logging**: sin logging explícito de fallos de autenticación (401) — pendiente si se requiere trazabilidad.
 - **A10 Condiciones excepcionales**: comportamiento por defecto de Spring Boot (errores no filtran stack trace en producción salvo `server.error.include-stacktrace` explícito, que no está seteado).
 
 Antes de mergear cambios con superficie de seguridad (auth, input externo, permisos, deploy), correr `security-review` (skill) o el agente `auditor-seguridad` si están disponibles — no depender solo de revisión manual.
@@ -417,7 +419,7 @@ Regla de dedo: si algo importa y **puede** verificarse mecánicamente, no dejarl
 
 ## 16. Mantenimiento
 
-Tratar como código. Revisar cuando se cree `bff/` o `ms-gastos-comunes/` (agregar su YAML a `config/`) o cuando se agregue autenticación al endpoint de config (§10).
+Tratar como código. Revisar cuando se cree `bff/` o `ms-gastos-comunes/` (agregar su YAML a `config/`) o cuando cambie el mecanismo de autenticación del endpoint de config (§10).
 
 Si otra herramienta requiere su propio archivo de reglas (`CLAUDE.md`, `.cursorrules`), symlinkearlo a este en vez de duplicar contenido — una sola fuente de verdad.
 
@@ -442,9 +444,9 @@ Modelo de calidad del producto, edición 2023: 9 características, cada una con 
 | Compatibilidad | coexistencia, interoperabilidad | compatibilidad con Spring Cloud Config Client y py-eureka-client / clientes HTTP REST | contratos estándar Spring Cloud Config vía HTTP |
 | Capacidad de interacción *(era Usabilidad)* | reconocibilidad, aprendibilidad, operabilidad, asistencia al usuario | `(no aplica interfaz visual directa: servicio de infraestructura HTTP consumido por microservicios)` | estructura YAML limpia y documentada |
 | Fiabilidad | ausencia de fallos, disponibilidad, tolerancia a fallos, recuperabilidad | servidor estable con endpoint de salud Actuator | `/actuator/health` en estado UP |
-| Seguridad | confidencialidad, integridad, no repudio, autenticidad | 25010 la exige como atributo; §10 y §17.2 la implementan | **Hallazgo conocido §10:** endpoint de configuración actualmente sin autenticación ni TLS en 8888 |
+| Seguridad | confidencialidad, integridad, no repudio, autenticidad | 25010 la exige como atributo; §10 y §17.2 la implementan | Basic Auth + TLS en 8888, secretos solo por env var (§10) |
 | Mantenibilidad | modularidad, reusabilidad, analizabilidad, modificabilidad, testeabilidad | configuración desacoplada del código fuente | YAMLs en `src/main/resources/config/` organizados por servicio |
-| Flexibilidad *(era Portabilidad)* | adaptabilidad, instalabilidad, reemplazabilidad, escalabilidad | despliegue multi-plataforma mediante contenedor Docker Alpine | imagen Docker reproducible (`eclipse-temurin:21-jre-alpine`) |
+| Flexibilidad *(era Portabilidad)* | adaptabilidad, instalabilidad, reemplazabilidad, escalabilidad | despliegue multi-plataforma mediante contenedor Docker Alpine | imagen Docker reproducible (`eclipse-temurin:25-jre-alpine`) |
 | Safety *(nueva en 2023)* | restricción operacional, comportamiento a prueba de fallos | `(no aplica: servicio de configuración sin superficie de daño físico a personas ni hardware)` | `(no aplica: sin superficie de safety física)` |
 
 **Qué cambió de 2011 a 2023:** Usabilidad pasó a Capacidad de interacción, Portabilidad a Flexibilidad, Safety se suma como nueva categoría, y Madurez pasó a Ausencia de fallos.
@@ -455,7 +457,7 @@ Protege la información sensible que el software procesa. Acá va el control imp
 
 | Propiedad | Control mínimo en el software | Evidencia |
 | --- | --- | --- |
-| Confidencialidad | **ausente** — sin auth ni TLS en el endpoint de config (ver §10) | `(no aplica: brecha conocida, sin evidencia de control activo)` |
+| Confidencialidad | Basic Auth + TLS en el endpoint de config (ver §10) | `SecurityConfig.java`, `server.ssl` en `application.yml`, `ConfigServerApplicationTests` |
 | Integridad | YAML de configuración versionados en el propio repo git, sin mutación en runtime | historial de git del repositorio |
 | Disponibilidad | monitoreo de salud vía Spring Boot Actuator | endpoint `/actuator/health` UP |
 
@@ -463,9 +465,9 @@ Protege la información sensible que el software procesa. Acá va el control imp
 
 | Control | Nombre | Dónde vive en este proyecto |
 | --- | --- | --- |
-| A.8.3 | Restricción de acceso a la información | **no implementado** — pendiente de remediación en §10 (Spring Security) |
+| A.8.3 | Restricción de acceso a la información | `SecurityConfig` (Spring Security): todo autenticado salvo health |
 | A.8.4 | Acceso al código fuente | permisos de repositorio git y branch protection (§11.3) |
-| A.8.5 | Autenticación segura | **no implementado en runtime** (endpoints HTTP abiertos sin Basic Auth) |
+| A.8.5 | Autenticación segura | HTTP Basic sobre TLS; credenciales por env var |
 | A.8.8 | Gestión de vulnerabilidades técnicas | dependencias Maven auditadas sin CVEs activos |
 | A.8.9 | Gestión de configuración | `application.yml` sin defaults inseguros más allá de la falta de auth señalada |
 | A.8.10 / A.8.11 | Eliminación / Enmascaramiento de datos | `(no aplica: sin persistencia de base de datos ni datos de residentes)` |
