@@ -55,4 +55,6 @@ spring:
 eureka:
   instance:
     hostname: ${EUREKA_INSTANCE_HOSTNAME:discovery-server}
+  server:
+    enable-self-preservation: true
 
