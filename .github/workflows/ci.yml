@@ -92,6 +92,7 @@ jobs:
           output: trivy-report.txt
           severity: CRITICAL,HIGH
           ignore-unfixed: true
+          trivyignores: .trivyignore
           exit-code: "0"
 
       - name: Resumen de Trivy
@@ -113,4 +114,5 @@ jobs:
           format: table
           severity: CRITICAL
           ignore-unfixed: true
+          trivyignores: .trivyignore
           exit-code: "1"
