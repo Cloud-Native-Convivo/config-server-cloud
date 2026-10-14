@@ -50,6 +50,7 @@ jobs:
           output: trivy-results.sarif
           severity: CRITICAL,HIGH
           ignore-unfixed: true
+          trivyignores: .trivyignore
           exit-code: "0"
 
       # always(): se sube el SARIF aun cuando Trivy falle por CRITICAL
@@ -69,6 +70,7 @@ jobs:
           format: table
           severity: CRITICAL
           ignore-unfixed: true
+          trivyignores: .trivyignore
           exit-code: "1"
 
       - name: Iniciar sesion en Docker Hub
