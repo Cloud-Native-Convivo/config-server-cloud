@@ -15,7 +15,7 @@ Plantilla adaptable. Al adaptarla a un proyecto real, sigue estas reglas — no 
 - Ante la duda entre conservar o borrar: conservar, y marcar `(sin uso actual en este proyecto)` en vez de eliminar. El minimalismo de la sección 6 (Ponytail) rige código nuevo a escribir, no autoriza podar documentación de referencia ya redactada.
 - Sin emojis en código, PR, docs generadas ni output — usar solo como último recurso si no existe alternativa real, nunca como decoración por defecto. En commits rige lo que diga la sección 11: Gitmoji (§11.2) es obligatorio por convención.
 - Nada de solución genérica de tutorial. Cada decisión responde a Convivo, no a un boilerplate de curso.
-- **Nota de dominio**: el paquete Java es `com.convivo.config_server`. `config/` sirve solo YAML de microservicios que existen hoy en `Microservicios/` — `discovery-server.yml` y `ms-espacios-comunes.yml`, ambos consumidos en runtime por sus respectivos servicios (`ms-espacios-comunes` lo hace best-effort vía HTTP en su arranque). Se eliminaron los YAML de servicios que no correspondían a ningún microservicio real del MVP de Convivo (`cloud-native/ERS.md` §2.1/§4.4: el perímetro de API es Amazon API Gateway administrado, no un servicio Spring propio; el BFF real se llama `bff`). `bff` y `ms-gastos-comunes` son componentes reales del MVP (ERS.md) pero **sin código en el workspace todavía** — cuando se creen esas carpetas se agrega su YAML, no antes.
+- **Nota de dominio**: el paquete Java es `com.convivo.config_server`. `config/` sirve YAML de los microservicios reales de Convivo. A 2026-10-14 contiene `discovery-server.yml`, `ms-espacios-comunes.yml`, `bff.yml` y `ms-gastos-comunes.yml` (verificado directamente en `src/main/resources/config/`) — `bff` y `ms-gastos-comunes` ya tienen código real en el workspace; la nota anterior de este archivo (que los daba como pendientes de crear, citando `cloud-native/ERS.md` §2.1/§4.4, archivo que no existe en este workspace) quedó obsoleta. El perímetro de API sigue siendo Amazon API Gateway administrado, no un servicio Spring propio.
 
 ## 0. Jerarquía de reglas
 
@@ -49,6 +49,8 @@ src/main/resources/
   config/
     discovery-server.yml         # servicio real, lo consume
     ms-espacios-comunes.yml      # servicio real, lo consume best-effort al arrancar
+    bff.yml                      # servicio real, agregado cuando bff/ pasó a tener código
+    ms-gastos-comunes.yml        # servicio real, agregado cuando ms-gastos-comunes/ pasó a tener código
 src/test/java/com/convivo/config_server/
   ConfigServerApplicationTests.java   # contexto + reglas de acceso (health 200, config 401/200)
 dockerfile                       # build multi-stage
@@ -381,7 +383,7 @@ git tag -n9              # Lista tags con hasta 9 líneas de su anotación
 - Configuración de CI/CD (`.github/workflows/docker-publish.yml`).
 - Archivos de secretos o `.env`.
 - Deploy a producción.
-- Borrar `discovery-server.yml` o `ms-espacios-comunes.yml`, o agregar YAML especulativo para servicios sin código todavía (`bff`, `ms-gastos-comunes`) sin decisión explícita del equipo (ver nota de dominio al inicio de este archivo).
+- Borrar `discovery-server.yml`, `ms-espacios-comunes.yml`, `bff.yml` o `ms-gastos-comunes.yml`, o agregar YAML especulativo para un servicio que todavía no tiene código en el workspace, sin decisión explícita del equipo (ver nota de dominio al inicio de este archivo).
 - Comunicación hacia afuera del repositorio.
 
 El criterio de fondo: **lo reversible dentro del repo se hace; lo que sale del repo, borra datos o reescribe historial compartido se pregunta.**
@@ -419,7 +421,7 @@ Regla de dedo: si algo importa y **puede** verificarse mecánicamente, no dejarl
 
 ## 16. Mantenimiento
 
-Tratar como código. Revisar cuando se cree `bff/` o `ms-gastos-comunes/` (agregar su YAML a `config/`) o cuando cambie el mecanismo de autenticación del endpoint de config (§10).
+Tratar como código. `bff/` y `ms-gastos-comunes/` ya tienen código y YAML en `config/` (verificado 2026-10-14); revisar esta sección cuando se cree un microservicio nuevo del workspace (agregar su YAML a `config/`) o cuando cambie el mecanismo de autenticación del endpoint de config (§10).
 
 Si otra herramienta requiere su propio archivo de reglas (`CLAUDE.md`, `.cursorrules`), symlinkearlo a este en vez de duplicar contenido — una sola fuente de verdad.
 
