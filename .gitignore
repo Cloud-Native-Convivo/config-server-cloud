@@ -36,6 +36,18 @@ build/
 .DS_Store
 Thumbs.db
 .codegraph/
+.scannerwork/
 .env
 .env.*
 !.env.example
+
+### Material criptografico (se monta en runtime) ###
+*.p12
+*.jks
+*.pem
+*.key
+
+# Config local de agentes de código
+.agents/
+.claude/
+.kilo

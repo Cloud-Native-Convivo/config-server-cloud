@@ -41,6 +41,8 @@ jobs:
       - name: Reporte Trivy (SARIF)
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
+          # trivy-action v0.36.0 trae Trivy 0.70.0 por defecto; Dependabot no actualiza este valor
+          version: v0.74.0
           image-ref: config-server-cloud:scan
           format: sarif
           # Sin esto trivy-action ignora severity con SARIF
@@ -48,12 +50,13 @@ jobs:
           output: trivy-results.sarif
           severity: CRITICAL,HIGH
           ignore-unfixed: true
+          trivyignores: .trivyignore
           exit-code: "0"
 
       # always(): se sube el SARIF aun cuando Trivy falle por CRITICAL
       - name: Subir SARIF a Code Scanning
         if: always()
-        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        uses: github/codeql-action/upload-sarif@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
         with:
           sarif_file: trivy-results.sarif
           category: trivy-image
@@ -61,10 +64,13 @@ jobs:
       - name: Bloquear publicacion si hay CRITICAL
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
+          # trivy-action v0.36.0 trae Trivy 0.70.0 por defecto; Dependabot no actualiza este valor
+          version: v0.74.0
           image-ref: config-server-cloud:scan
           format: table
           severity: CRITICAL
           ignore-unfixed: true
+          trivyignores: .trivyignore
           exit-code: "1"
 
       - name: Iniciar sesion en Docker Hub

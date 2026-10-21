@@ -7,3 +7,5 @@ target/
 .vscode
 .env
 .env.*
+*.p12
+*.jks

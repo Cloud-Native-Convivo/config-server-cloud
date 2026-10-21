@@ -13,11 +13,11 @@ db:
 rabbitmq:
   host: localhost
   port: 5672
-  usuario: guest
-  contrasena: guest
+  usuario: ${RABBITMQ_USER:guest}
+  contrasena: ${RABBITMQ_PASSWORD}
 
 eureka:
-  url: http://admin:admin123@localhost:8761/eureka/
+  url: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD}@localhost:8761/eureka/
   ip: 127.0.0.1
   port: 8082
 
