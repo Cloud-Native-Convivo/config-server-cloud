@@ -15,7 +15,7 @@ Plantilla adaptable. Al adaptarla a un proyecto real, sigue estas reglas — no 
 - Ante la duda entre conservar o borrar: conservar, y marcar `(sin uso actual en este proyecto)` en vez de eliminar. El minimalismo de la sección 6 (Ponytail) rige código nuevo a escribir, no autoriza podar documentación de referencia ya redactada.
 - Sin emojis en código, PR, docs generadas ni output — usar solo como último recurso si no existe alternativa real, nunca como decoración por defecto. En commits rige lo que diga la sección 11: Gitmoji (§11.2) es obligatorio por convención.
 - Nada de solución genérica de tutorial. Cada decisión responde a Convivo, no a un boilerplate de curso.
-- **Nota de dominio**: el paquete Java es `com.convivo.config_server`. `config/` sirve YAML de los microservicios reales de Convivo. A 2026-10-14 contiene `discovery-server.yml`, `ms-espacios-comunes.yml`, `bff.yml` y `ms-gastos-comunes.yml` (verificado directamente en `src/main/resources/config/`) — `bff` y `ms-gastos-comunes` ya tienen código real en el workspace; la nota anterior de este archivo (que los daba como pendientes de crear) quedó obsoleta. El perímetro de API sigue siendo Amazon API Gateway administrado, no un servicio Spring propio.
+- **Nota de dominio**: el paquete Java es `com.convivo.config_server`. `config/` sirve YAML de los microservicios reales de Convivo. A 2026-11-10 contiene `discovery-server.yml`, `ms-espacios-comunes.yml`, `bff.yml`, `ms-gastos-comunes.yml`, `ms-condominios.yml` y `ms-usuario-cloud.yml` (verificado directamente en `src/main/resources/config/`) — `bff` y `ms-gastos-comunes` ya tienen código real en el workspace; la nota anterior de este archivo (que los daba como pendientes de crear) quedó obsoleta. El perímetro de API sigue siendo Amazon API Gateway administrado, no un servicio Spring propio.
 
 ## 0. Jerarquía de reglas
 
@@ -51,6 +51,8 @@ src/main/resources/
     ms-espacios-comunes.yml      # servicio real, lo consume best-effort al arrancar
     bff.yml                      # servicio real, agregado cuando bff/ pasó a tener código
     ms-gastos-comunes.yml        # servicio real, agregado cuando ms-gastos-comunes/ pasó a tener código
+    ms-condominios.yml           # servicio real, agregado por decisión del equipo (config centralizada de todos los servicios)
+    ms-usuario-cloud.yml         # servicio real, agregado por decisión del equipo (config centralizada de todos los servicios)
 src/test/java/com/convivo/config_server/
   ConfigServerApplicationTests.java   # contexto + reglas de acceso (health 200, config 401/200)
 dockerfile                       # build multi-stage

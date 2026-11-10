@@ -8,6 +8,8 @@ eureka:
   services:
     gastos: MS-GASTOS-COMUNES
     espacios: MS-ESPACIOS-COMUNES
+    condominios: MS-CONDOMINIOS
+    usuarios: MS-USUARIO-CLOUD
 
 proxy:
   timeout-ms: 2000
