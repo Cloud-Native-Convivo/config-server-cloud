@@ -1,0 +1,16 @@
+# ms-usuario-cloud (FastAPI) - Configuración centralizada servida por config-server
+# Credenciales sensibles (db password) quedan en variables de entorno / Secrets Manager.
+
+server:
+  port: 8085
+
+db:
+  host: localhost
+  port: 1521
+  name: FREEPDB1
+  username: admin
+
+eureka:
+  url: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD}@localhost:8761/eureka/
+  ip: 127.0.0.1
+  port: 8085

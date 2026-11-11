@@ -1,0 +1,22 @@
+# ms-condominios (FastAPI) - Configuración centralizada servida por config-server
+# Credenciales sensibles (db password, rabbitmq contraseña) quedan en variables de entorno / Secrets Manager.
+
+server:
+  port: 8084
+
+db:
+  host: localhost
+  port: 1521
+  name: FREEPDB1
+  username: admin
+
+rabbitmq:
+  host: localhost
+  port: 5672
+  usuario: ${RABBITMQ_USER:guest}
+  contrasena: ${RABBITMQ_PASSWORD}
+
+eureka:
+  url: http://${EUREKA_USER:admin}:${EUREKA_PASSWORD}@localhost:8761/eureka/
+  ip: 127.0.0.1
+  port: 8084
